@@ -1,0 +1,66 @@
+{
+    "info": {
+        "name": "Blockchain API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Mine a New Block",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/mine",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "mine"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Create a New Transaction",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"sender\": \"address1\",\n  \"recipient\": \"address2\",\n  \"amount\": 10\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/transactions/new",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "transactions",
+                        "new"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "View Full Blockchain",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/chain",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "chain"
+                    ]
+                }
+            }
+        }
+    ]
+}
