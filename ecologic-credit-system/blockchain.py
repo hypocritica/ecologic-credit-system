@@ -59,7 +59,7 @@ class Blockchain(object):
         if not re.match(val_pattern, transaction.value):
             return False
             
-        dest_pattern = r"^[0-9a-fA-F]{430}$"
+        dest_pattern = r"^[0-9a-fA-F]{64}$"
         if not re.match(dest_pattern, transaction.dest):
             return False
         
