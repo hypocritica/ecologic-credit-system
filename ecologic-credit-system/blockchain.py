@@ -70,6 +70,46 @@ class Blockchain(object):
         self.mempool.append(transaction)
         return True
     
+    def get_transaction_history(self, vk_hash):
+        """
+        Returns the transaction history for a verification key hash
+        :param vk_hash:
+        :return: list of transactions
+        """
+        transactions = []
+        for block in self.chain:
+            for transaction in block.transactions:
+                if transaction.author == vk_hash:
+                    # Transaction sent by vk_hash
+                    if transaction.dest == vk_hash:
+                        # Transaction with theyselves (creation or suppression of credits)
+                        transactions.append([
+                            transaction.message,
+                            int(transaction.val[1:]), 
+                            None,
+                            transaction.date
+                        ])
+                    else:
+                        # Transaction to another user
+                        transactions.append([
+                            transaction.message,
+                            -int(transaction.val[1:]),  
+                            transaction.dest,
+                            transaction.date
+                        ])
+                elif transaction.dest == vk_hash:
+                    # Transaction received by vk_hash
+                    transactions.append([
+                        transaction.message,
+                        int(transaction.val[1:]),  
+                        transaction.author,
+                        transaction.date
+                    ])
+
+        transactions.sort(key=lambda transaction: utils.str_to_time(transaction[3]))
+
+        return transactions
+
     def new_block(self, block=None):
         """
         Create a new block from transactions choosen in the mempool.
