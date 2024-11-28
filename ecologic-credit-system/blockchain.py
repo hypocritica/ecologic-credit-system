@@ -19,20 +19,27 @@ class Blockchain(object):
     def last_block(self):
         return self.chain[-1]
     
-    def get_balance(self, verifying_key_hash):
+    def get_balance(self, vk_hash):
         """
         *
         Returns the balance associated to the verifying key hash in parameters.
-        :param verifying_key_hash:
+        :param vk_hash:
         :return: Int
         """
         balance = 0
         for block in self.chain:
             for transaction in block.transactions:
-                if transaction.author == verifying_key_hash:
-                    balance += transaction.value
-                if transaction.dest == verifying_key_hash:
-                    balance -= transaction.value
+                if transaction.author == vk_hash:
+                    # Transaction sent by vk_hash
+                    if transaction.dest == vk_hash:
+                        # Transaction with itself (creation of funds)
+                        balance += int(transaction.val[1:])  # Add the transaction value to the balance
+                    else:
+                        # Transaction to another user
+                        balance -= int(transaction.val[1:])  # Subtract the transaction value from the balance
+                elif transaction.dest == vk_hash:
+                    # Transaction received by vk_hash
+                    balance += int(transaction.val[1:])  # Add the transaction value to the balance
         return balance
 
     def add_transaction(self, transaction):
