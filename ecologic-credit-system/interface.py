@@ -25,29 +25,37 @@ def mine_block():
         messagebox.showerror("Error", str(e))
 
 
-def calculate_amount():
-    # Calculate amount based on selected options
-    selected_options = [var.get() for var in option_vars if var.get() != "None"]
-    amount = sum(option_values[option] for option in selected_options)
-    amount_entry.delete(0, tk.END)
-    amount_entry.insert(0, str(amount))
-
-
 def new_transaction():
     try:
         sender = get_local_address()
-        recipient = recipient_entry.get()
-        amount = amount_entry.get()
+        destinataire = destinataire_entry.get()
+        message = message_entry.get()
+        value = value_entry.get()
+        
+        # Validate the value for compulsory +/- sign
+        if not value.startswith('+') and not value.startswith('-'):
+            messagebox.showerror("Input Error", "Value must start with '+' for credits gained or '-' for credits lost.")
+            return
+        
+        # Convert value to integer after validation
+        value = int(value)
+        
+        # Transaction data
         data = {
             "sender": sender,
-            "recipient": recipient,
-            "amount": int(amount)
+            "destinataire": destinataire,
+            "message": message,
+            "value": value
         }
-        response = requests.post(hostip + '/new', json=data)
+        
+        # Send transaction to the backend
+        response = requests.post(hostip + '/transactions/new', json=data)
         if response.status_code == 201:
             messagebox.showinfo("New Transaction", response.json()["message"])
         else:
             messagebox.showerror("New Transaction", "Failed to create transaction.")
+    except ValueError:
+        messagebox.showerror("Input Error", "Value must be a valid integer starting with '+' or '-'.")
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -66,7 +74,7 @@ def view_chain():
 
 # Setup Tkinter window
 root = tk.Tk()
-root.title("Blockchain User Interface")
+root.title("Ecological Credit System")
 
 # Mine Block Button
 mine_button = tk.Button(root, text="Mine Block", command=mine_block)
@@ -79,23 +87,20 @@ sender_entry = tk.Entry(root)
 sender_entry.insert(0, get_local_address())
 sender_entry.config(state='disabled')
 sender_entry.pack()
-tk.Label(root, text="Recipient Address (Default: address2):").pack()
-recipient_entry = tk.Entry(root)
-recipient_entry.insert(0, "address2")
-recipient_entry.pack()
 
-# Amount Calculation Section
-tk.Label(root, text="Options for Amount Calculation:").pack(pady=5)
-option_values = {"Option A": 1, "Option B": 1.5, "Option C": 2}
-option_vars = []
-for option, value in option_values.items():
-    var = tk.StringVar(value="None")
-    option_vars.append(var)
-    tk.Checkbutton(root, text=f"{option} ({value})", variable=var, onvalue=option, offvalue="None", command=calculate_amount).pack()
+# New Destinataire Field
+tk.Label(root, text="Destinataire:").pack()
+destinataire_entry = tk.Entry(root)
+destinataire_entry.pack()
 
-tk.Label(root, text="Amount:").pack()
-amount_entry = tk.Entry(root)
-amount_entry.pack()
+# New Section for Message and Value
+tk.Label(root, text="Message for Transaction:").pack(pady=5)
+message_entry = tk.Entry(root)
+message_entry.pack()
+
+tk.Label(root, text="Value of Credits Lost/Gained (e.g., +10 or -10):").pack(pady=5)
+value_entry = tk.Entry(root)
+value_entry.pack()
 
 # Create Transaction Button
 transaction_button = tk.Button(root, text="Create Transaction", command=new_transaction)

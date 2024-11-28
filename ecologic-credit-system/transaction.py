@@ -52,17 +52,17 @@ class Transaction(object):
         """
         self.message = message
         
-        val_pattern = r"^[-+][0-9]+$"
-        if re.match(val_pattern, value):
-            self.value = value
-        else:
-            raise InvalidValue
+        # val_pattern = r"^[-+][0-9]+$"
+        # if re.match(val_pattern, value):
+        #     self.value = value
+        # else:
+        #     raise InvalidValue
         
-        dest_pattern = r"^[0-9a-fA-F]{430}$"
-        if re.match(dest_pattern, dest):
-            self.dest = dest
-        else:
-            raise InvalidDestination
+        # dest_pattern = r"^[0-9a-fA-F]{430}$"
+        # if re.match(dest_pattern, dest):
+        #     self.dest = dest
+        # else:
+        #     raise InvalidDestination
 
 
         if date:

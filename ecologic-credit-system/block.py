@@ -87,11 +87,11 @@ class Block(object):
         str_hash = self.hash()
         str_hash = str_hash[:10] + '...' + str_hash[-10:]
         string = f"""
-index:                  {self.index}
-hash:                   {str_hash}
-timestamp:              {self.timestamp}
-nb of transactions:     {len(self.transactions)}
-proof:                  {self.proof}"""
+                index:                  {self.index}
+                hash:                   {str_hash}
+                timestamp:              {self.timestamp}
+                nb of transactions:     {len(self.transactions)}
+                proof:                  {self.proof}"""
     
         return string
 

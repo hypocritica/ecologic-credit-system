@@ -1,8 +1,10 @@
-from blockchain import *
+from blockchain import Blockchain
 from flask import Flask, jsonify, request
 import socket
 from transaction import Transaction
 import utils
+import random
+import string
 
 # Instantiate our Node
 app = Flask(__name__)
@@ -29,15 +31,19 @@ def new_transaction():
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['message', 'value', 'dest']
+    required = ['message', 'author', 'vk', 'signature', 'value', 'dest', 'date']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
     # Create a new Transaction
     transaction = Transaction(
         message=values['message'],
+        author=values['author'],
+        vk=values['vk'],
+        signature=values['signature'],
         value=values['value'],
         dest=values['dest'],
+        date=values['date']
     )
 
     # Add transaction to the mempool
@@ -145,6 +151,64 @@ def merge_chain():
     else:
         response = {'message': 'Merge unsuccessful. The provided chain is not longer or not valid.'}
     
+    return jsonify(response), 200
+
+@app.route('/test/merge', methods=['GET'])
+def merge_test():
+    """
+    Test merging two blockchains with random transactions
+    """
+    from ecdsa import SigningKey
+    blockchain1 = Blockchain()
+    blockchain2 = Blockchain()
+
+    sk1 = SigningKey.generate()
+    sk2 = SigningKey.generate()
+
+    # Create 100 random transactions for blockchain1
+    for i in range(100):
+        message = f"Message {i}"
+        author = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        vk = sk1.verifying_key.to_string().hex()
+        signature = sk1.sign(message.encode()).hex()
+        value = random.randint(-100, 100)
+        dest = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        date = utils.get_time()
+
+        transaction = Transaction(message, author, vk, signature, value, dest, date)
+        blockchain1.add_transaction(transaction)
+
+    # Create 100 random transactions for blockchain2
+    for i in range(100):
+        message = f"Message {i}"
+        author = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        vk = sk2.verifying_key.to_string().hex()
+        signature = sk2.sign(message.encode()).hex()
+        value = random.randint(-100, 100)
+        dest = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+        date = utils.get_time()
+
+        transaction = Transaction(message, author, vk, signature, value, dest, date)
+        blockchain2.add_transaction(transaction)
+
+    # Mine blocks for both blockchains
+    for _ in range(3):
+        block1 = blockchain1.new_block()
+        blockchain1.extend_chain(block1)
+
+    for _ in range(2):
+        block2 = blockchain2.new_block()
+        blockchain2.extend_chain(block2)
+
+    # Merge the two blockchains
+    blockchain1.merge(blockchain2)
+    blockchain2.merge(blockchain1)
+
+    response = {
+        'message': 'Merge test completed',
+        'blockchain1_length': len(blockchain1),
+        'blockchain2_length': len(blockchain2)
+    }
     return jsonify(response), 200
 
 if __name__ == '__main__':

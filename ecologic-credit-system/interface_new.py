@@ -4,7 +4,7 @@ import requests
 import json
 
 # Replace SERVER_IP with the actual IP address of the server running the Flask application
-server_ip = '138.195.57.189'  # Example server IP address
+server_ip = '138.195.53.65'  # Example server IP address
 
 # Define the Flask server URL
 base_url = f'http://{server_ip}:5000'
