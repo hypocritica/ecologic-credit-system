@@ -58,7 +58,7 @@ class Transaction(object):
         else:
             raise InvalidValue
         
-        dest_pattern = r"^[0-9a-fA-F]{64}$"
+        dest_pattern = r"^[0-9a-f]{64}$"
         if re.match(dest_pattern, dest):
             self.dest = dest
         else:
@@ -85,17 +85,19 @@ class Transaction(object):
         """
         return json.dumps(self.data, sort_keys=True)
 
+    
     @property
     def data(self):
         d = {
             "message": self.message,
             "value": self.value,
-            "destination": self.dest,
+            "dest": self.dest,
             "date": self.date,
             "author": self.author,
             "vk": self.vk
         }
         return d
+
 
     def sign(self, sk):
         """
