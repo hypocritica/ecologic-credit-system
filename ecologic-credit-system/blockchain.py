@@ -45,7 +45,7 @@ class Blockchain(object):
     def add_transaction(self, transaction):
         """
         Add a new transaction to the mempool. Return True if the transaction is valid and not already in the mempool.
-        *We also assert that the message in the transaction is valid.
+        *We also assert that the message in the transaction is valid. and that the transaction is possible according to the suer's balance
         :param transaction:
         :return: True or False
         """
