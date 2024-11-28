@@ -518,7 +518,7 @@ def fail_test():
             is_fail = True
             print(t.message)
     
-    # TEST: Identity theft is a crime Jimmy
+    # TEST: Identity theft is not a joke Jim!
     les_t = []
 
     t = Transaction('admin self -', '-150')
