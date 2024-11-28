@@ -38,10 +38,15 @@ class Blockchain(object):
         if utils.str_to_time(transaction.date) > utils.str_to_time(utils.get_time()):
             return False
         
-        #* assert that the message is valid
-        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[-+][0-9]+$"
-        if not re.match(pattern, transaction.message):
+        #* assert that the value and destination are valid
+        val_pattern = r"^[-+][0-9]+$"
+        if not re.match(val_pattern, transaction.value):
             return False
+            
+        dest_pattern = r"^[0-9a-fA-F]{430}$"
+        if not re.match(dest_pattern, transaction.dest):
+            return False
+            
         
         self.mempool.append(transaction)
         return True
