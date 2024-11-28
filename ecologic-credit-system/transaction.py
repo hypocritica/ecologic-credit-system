@@ -28,17 +28,20 @@ import re
 class IncompleteTransaction(Exception):
     pass
 
-class InvalidMessage(Exception):
+class InvalidValue(Exception):
+    pass
+
+class InvalidDestination(Exception):
     pass
 
 
 class Transaction(object):
-    def __init__(self, message, date=None, signature=None, vk=None, author=None):
+    def __init__(self, message, value, dest, date=None, signature=None, vk=None, author=None):
         """
         Initialize a transaction. If date is None, the current time is used.
         Signature and verifying key may be None.
 
-        *Assert that the message is valid
+        *Assert that the value and the destination are valid
 
         Author is the hash of the verifying key (or None if vk is not specified).
 
@@ -48,11 +51,19 @@ class Transaction(object):
         :param vk: str
         """
         self.message = message
+        
+        val_pattern = r"^[-+][0-9]+$"
+        if re.match(val_pattern, value):
+            self.value = value
+        else:
+            raise InvalidValue
+        
+        dest_pattern = r"^[0-9a-fA-F]{430}$"
+        if re.match(dest_pattern, dest):
+            self.dest = dest
+        else:
+            raise InvalidDestination
 
-        #* We assert that the message is valid
-        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[-+][0-9]+$"
-        if re.match(pattern, message):
-            raise InvalidMessage
 
         if date:
             self.date = date
