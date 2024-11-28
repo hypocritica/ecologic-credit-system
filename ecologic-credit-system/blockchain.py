@@ -81,6 +81,7 @@ class Blockchain(object):
             sender_balance = self.get_balance(transaction.author)
             #* check that the author has enough credit to give some to another user
             if transaction.author != transaction.dest and sender_balance < abs(int(transaction.value)):
+                print(sender_balance, abs(int(transaction.value)))
                 return False
             #* prevent the author from giving himself credit
             if transaction.author == transaction.dest and transaction.value[0]=="+":
@@ -363,16 +364,20 @@ def admin_test():
         t.sign(sk_admin)
         blockchain.add_transaction(t)
     
-    t = Transaction("A gives to B", '+7', hash_b)
-    t.sign(sk_a)
-    print(blockchain.add_transaction(t))
-    
     for i in range(2):
         b = blockchain.new_block()
         b.mine()
         blockchain.extend_chain(b)
 
-    print("Expect: +12 +8 -75")
+    t = Transaction("A gives to B", '+7', hash_b)
+    t.sign(sk_a)
+    print(blockchain.add_transaction(t))
+
+    b = blockchain.new_block()
+    b.mine()
+    blockchain.extend_chain(b)
+
+    print("Expect: +13 +7 -75")
     print("a :", blockchain.get_balance(hash_a))
     print("b :", blockchain.get_balance(hash_b))
     print("admin :", blockchain.get_balance(hash_admin))
