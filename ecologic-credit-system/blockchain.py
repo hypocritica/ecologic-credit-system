@@ -39,7 +39,7 @@ class Blockchain(object):
             return False
         
         #* assert that the message is valid
-        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[0-9]+$"
+        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[-+][0-9]+$"
         if not re.match(pattern, transaction.message):
             return False
         

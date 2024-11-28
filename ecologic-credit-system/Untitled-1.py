@@ -1,7 +1,7 @@
 import re
 
 
-pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[0-9]+$"
+pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[-+][0-9]+$"
 
 def test():
     string = None
@@ -9,3 +9,4 @@ def test():
         string = input()
         print(re.match(pattern, string))
 
+test()

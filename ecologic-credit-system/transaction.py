@@ -50,10 +50,9 @@ class Transaction(object):
         self.message = message
 
         #* We assert that the message is valid
-        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[0-9]+$"
-        if not re.match(pattern, message):
+        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[-+][0-9]+$"
+        if re.match(pattern, message):
             raise InvalidMessage
-
 
         if date:
             self.date = date
