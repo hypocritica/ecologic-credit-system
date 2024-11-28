@@ -21,25 +21,28 @@ class Blockchain(object):
     
     def get_balance(self, vk_hash):
         """
-        *
         Returns the balance associated to the verifying key hash in parameters.
+        A self transaction is considered to be a creation of value
         :param vk_hash:
         :return: Int
         """
         balance = 0
+        memo = []
         for block in self.chain:
             for transaction in block.transactions:
-                if transaction.author == vk_hash:
-                    # Transaction sent by vk_hash
-                    if transaction.dest == vk_hash:
-                        # Transaction with itself (creation of funds)
+                if transaction.hash() not in memo:
+                    memo.append(transaction.hash())
+                    if transaction.author == vk_hash:
+                        # Transaction sent by vk_hash
+                        if transaction.dest == vk_hash:
+                            # Transaction with itself (creation of funds)
+                            balance += int(transaction.value)  # Add the transaction value to the balance
+                        else:
+                            # Transaction to another user
+                            balance -= int(transaction.value)  # Subtract the transaction value from the balance
+                    elif transaction.dest == vk_hash:
+                        # Transaction received by vk_hash
                         balance += int(transaction.value)  # Add the transaction value to the balance
-                    else:
-                        # Transaction to another user
-                        balance -= int(transaction.value)  # Subtract the transaction value from the balance
-                elif transaction.dest == vk_hash:
-                    # Transaction received by vk_hash
-                    balance += int(transaction.value)  # Add the transaction value to the balance
         return balance
 
     def add_transaction(self, transaction):
@@ -75,24 +78,15 @@ class Blockchain(object):
         
         #* 
         if not transaction.author in admin_list:
-            print(admin_list)
-            print(transaction.author)
-            print(transaction.dest)
-            print(transaction.value)
             sender_balance = self.get_balance(transaction.author)
-            print(sender_balance)
-            print(abs(int(transaction.value)))
-            #* check that the author has enough credit for the transaction
-            if sender_balance < abs(int(transaction.value)):
-                print('fail 1')
+            #* check that the author has enough credit to give some to another user
+            if transaction.author != transaction.dest and sender_balance < abs(int(transaction.value)):
                 return False
             #* prevent the author from giving himself credit
             if transaction.author == transaction.dest and transaction.value[0]=="+":
-                print('fail 2')
                 return False
             #* prevent teh author from stealing money to another user
             if transaction.author != transaction.dest and transaction.value[0]=="-":
-                print('fail 3')
                 return False
 
         
@@ -151,6 +145,9 @@ class Blockchain(object):
         transactions = random.sample(self.mempool, min(len(self.mempool), config.blocksize))
         new_block = block.next(transactions)
 
+        for transaction in transactions:
+            self.mempool.remove(transaction)
+
         return new_block
 
     def extend_chain(self, block):
@@ -179,9 +176,10 @@ class Blockchain(object):
         string = '-----------Blockchain-----------'
         for block in self.chain:
             string+= '\n' + str(block)
-        string+= '\n-----------Mempool-----------'
-        for trans in self.mempool:
-            string+= '\n' + str(trans)
+        if config.show_mempool:
+            string+= '\n-----------Mempool-----------'
+            for trans in self.mempool:
+                string+= '\n' + str(trans)
         return string
 
     def validity(self):
@@ -324,24 +322,63 @@ def mon_test():
 
 def admin_test():
     print('-----------admin_test-----------')
-    import ecdsa
     from ecdsa import SigningKey
+    from utils import hash_str
+
     blockchain = Blockchain()
     sk_a = SigningKey.generate()
+    hash_a = hash_str(sk_a)
     sk_b = SigningKey.generate()
+    hash_b = hash_str(sk_b)
     sk_admin = config.sk_admin
     hash_admin = config.admin_list[0]
 
-    t = Transaction('A creation', '-10')
-    t.sign(sk_admin)
-    blockchain.add_transaction(t)
+    for i in range(5):
+        t = Transaction(f'Admin - Loose money {i}', '-10')
+        t.sign(sk_admin)
+        blockchain.add_transaction(t)
 
-    b = blockchain.new_block()
-    b.mine()
-    blockchain.extend_chain(b)
+    for i in range(5):
+        t = Transaction(f'Admin - Gain money {i}', '+3')
+        t.sign(sk_admin)
+        blockchain.add_transaction(t)
+
+    for i in range(5):
+        t = Transaction(f'UserA - Loose Money {i}', '-4')
+        t.sign(sk_a)
+        blockchain.add_transaction(t)
+    
+    for i in range(5):
+        b = blockchain.new_block()
+        b.mine()
+        blockchain.extend_chain(b)
+        
+    print("Expect: -20 0 -35")
+    print("a :", blockchain.get_balance(hash_a))
+    print("b :", blockchain.get_balance(hash_b))
+    print("admin :", blockchain.get_balance(hash_admin))
+
+    for i in range(5):
+        t = Transaction(f'Admin gives to A {i}', '+8', hash_a)
+        t.sign(sk_admin)
+        blockchain.add_transaction(t)
+    
+    t = Transaction("A gives to B", '+7', hash_b)
+    t.sign(sk_a)
+    print(blockchain.add_transaction(t))
+    
+    for i in range(2):
+        b = blockchain.new_block()
+        b.mine()
+        blockchain.extend_chain(b)
+
+    print("Expect: +12 +8 -75")
+    print("a :", blockchain.get_balance(hash_a))
+    print("b :", blockchain.get_balance(hash_b))
+    print("admin :", blockchain.get_balance(hash_admin))
 
     print(blockchain)
-    print(blockchain.get_balance(hash_admin))
+    
 
 if __name__ == '__main__':
     print("Blockchain test")

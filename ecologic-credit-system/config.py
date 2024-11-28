@@ -10,12 +10,10 @@ default_difficulty = 3
 # the list of public keys ash for admins
 import ecdsa
 from ecdsa import SigningKey
-import hashlib
+from utils import hash_str
 
 sk_admin = SigningKey.generate(curve=ecdsa.SECP256k1)
-vk = sk_admin.verifying_key.to_pem().hex()
-hash = hashlib.sha256(vk.encode()).hexdigest()
-
-
-
+hash = hash_str(sk_admin)
 admin_list = [hash] 
+
+show_mempool = True

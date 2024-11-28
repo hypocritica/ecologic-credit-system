@@ -1,5 +1,7 @@
 from datetime import datetime
-
+import ecdsa
+from ecdsa import SigningKey
+import hashlib
 
 def get_time():
     """
@@ -16,3 +18,8 @@ def str_to_time(s):
     :return:
     """
     return datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f")
+
+def hash_str(sk):
+    vk = sk.verifying_key.to_pem().hex()
+    hash = hashlib.sha256(vk.encode()).hexdigest()
+    return hash
