@@ -22,8 +22,13 @@ from ecdsa import VerifyingKey, BadSignatureError
 from rich.console import Console
 from rich.table import Table
 
+import re
+
 
 class IncompleteTransaction(Exception):
+    pass
+
+class InvalidMessage(Exception):
     pass
 
 
@@ -33,6 +38,8 @@ class Transaction(object):
         Initialize a transaction. If date is None, the current time is used.
         Signature and verifying key may be None.
 
+        *Assert that the message is valid
+
         Author is the hash of the verifying key (or None if vk is not specified).
 
         :param message: str
@@ -41,6 +48,12 @@ class Transaction(object):
         :param vk: str
         """
         self.message = message
+
+        #* We assert that the message is valid
+        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[0-9]+$"
+        if not re.match(pattern, message):
+            raise InvalidMessage
+
 
         if date:
             self.date = date

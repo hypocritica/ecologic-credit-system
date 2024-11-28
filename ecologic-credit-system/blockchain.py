@@ -8,6 +8,7 @@ import utils
 from block import Block, InvalidBlock
 from transaction import Transaction
 
+import re
 
 class Blockchain(object):
     def __init__(self):
@@ -21,6 +22,7 @@ class Blockchain(object):
     def add_transaction(self, transaction):
         """
         Add a new transaction to the mempool. Return True if the transaction is valid and not already in the mempool.
+        *We also assert that the message in the transaction is valid
         :param transaction:
         :return: True or False
         """
@@ -34,6 +36,11 @@ class Blockchain(object):
             return False
         
         if utils.str_to_time(transaction.date) > utils.str_to_time(utils.get_time()):
+            return False
+        
+        #* assert that the message is valid
+        pattern = r"^[^:]+(?:\s+[^:]+)*\s*:\s*[0-9]+$"
+        if not re.match(pattern, transaction.message):
             return False
         
         self.mempool.append(transaction)
