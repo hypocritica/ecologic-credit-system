@@ -64,7 +64,6 @@ class Transaction(object):
         else:
             raise InvalidDestination
 
-
         if date:
             self.date = date
         else:
@@ -78,6 +77,7 @@ class Transaction(object):
         else:
             self.author = author
 
+    @property
     def json_dumps(self):
         """
         Return a json representation of the transaction. The keys are sorted.
@@ -85,6 +85,8 @@ class Transaction(object):
         """
         return json.dumps(self.data, sort_keys=True)
 
+    #the json_dump already replace the data function
+    '''
     @property
     def data(self):
         d = {
@@ -94,6 +96,7 @@ class Transaction(object):
             "vk": self.vk
         }
         return d
+    '''
 
     def sign(self, sk):
         """
