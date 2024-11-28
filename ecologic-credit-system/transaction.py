@@ -36,7 +36,7 @@ class InvalidDestination(Exception):
 
 
 class Transaction(object):
-    def __init__(self, message, value, dest, date=None, signature=None, vk=None, author=None):
+    def __init__(self, message, value=None, dest=None, date=None, signature=None, vk=None, author=None):
         """
         Initialize a transaction. If date is None, the current time is used.
         Signature and verifying key may be None.
@@ -58,7 +58,7 @@ class Transaction(object):
         else:
             raise InvalidValue
         
-        dest_pattern = r"^[0-9a-fA-F]{430}$"
+        dest_pattern = r"^[0-9a-fA-F]{64}$"
         if re.match(dest_pattern, dest):
             self.dest = dest
         else:
@@ -85,8 +85,6 @@ class Transaction(object):
         """
         return json.dumps(self.data, sort_keys=True)
 
-    #the json_dump already replace the data function
-    '''
     @property
     def data(self):
         d = {
@@ -96,7 +94,6 @@ class Transaction(object):
             "vk": self.vk
         }
         return d
-    '''
 
     def sign(self, sk):
         """
