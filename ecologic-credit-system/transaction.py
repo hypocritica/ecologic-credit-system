@@ -36,7 +36,7 @@ class InvalidDestination(Exception):
 
 
 class Transaction(object):
-    def __init__(self, message, value=None, dest=None, date=None, signature=None, vk=None, author=None):
+    def __init__(self, message, value, dest=None, date=None, signature=None, vk=None, author=None):
         """
         Initialize a transaction. If date is None, the current time is used.
         Signature and verifying key may be None.
@@ -57,12 +57,6 @@ class Transaction(object):
             self.value = value
         else:
             raise InvalidValue
-        
-        dest_pattern = r"^[0-9a-f]{64}$"
-        if re.match(dest_pattern, dest):
-            self.dest = dest
-        else:
-            raise InvalidDestination
 
         if date:
             self.date = date
@@ -77,7 +71,15 @@ class Transaction(object):
         else:
             self.author = author
 
-    @property
+        if dest:
+            dest_pattern = r"^[0-9a-f]{64}$"
+            if re.match(dest_pattern, dest):
+                self.dest = dest
+            else:
+                raise InvalidDestination
+        else:
+            self.dest = self.author
+
     def json_dumps(self):
         """
         Return a json representation of the transaction. The keys are sorted.
@@ -107,6 +109,10 @@ class Transaction(object):
         self.vk = sk.verifying_key.to_pem().hex()
 
         self.author = hashlib.sha256(self.vk.encode()).hexdigest()
+
+        #* manage the case where dest is None
+        if not self.dest:
+            self.dest = self.author
 
         self.signature = sk.sign(self.json_dumps().encode()).hex()
 

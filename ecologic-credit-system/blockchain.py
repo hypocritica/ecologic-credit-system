@@ -33,13 +33,13 @@ class Blockchain(object):
                     # Transaction sent by vk_hash
                     if transaction.dest == vk_hash:
                         # Transaction with itself (creation of funds)
-                        balance += int(transaction.val[1:])  # Add the transaction value to the balance
+                        balance += int(transaction.value)  # Add the transaction value to the balance
                     else:
                         # Transaction to another user
-                        balance -= int(transaction.val[1:])  # Subtract the transaction value from the balance
+                        balance -= int(transaction.value)  # Subtract the transaction value from the balance
                 elif transaction.dest == vk_hash:
                     # Transaction received by vk_hash
-                    balance += int(transaction.val[1:])  # Add the transaction value to the balance
+                    balance += int(transaction.value)  # Add the transaction value to the balance
         return balance
 
     def add_transaction(self, transaction):
@@ -55,7 +55,7 @@ class Blockchain(object):
         if transaction in self.mempool:
             return False
         
-        if transaction.message==None or transaction.date==None or transaction.author==None or transaction.vk==None or transaction.signature==None:
+        if transaction.message==None or transaction.date==None or transaction.author==None or transaction.vk==None or transaction.signature==None or transaction.dest==None or transaction.value==None:
             return False
         
         if not transaction.verify():
@@ -75,15 +75,24 @@ class Blockchain(object):
         
         #* 
         if not transaction.author in admin_list:
+            print(admin_list)
+            print(transaction.author)
+            print(transaction.dest)
+            print(transaction.value)
             sender_balance = self.get_balance(transaction.author)
+            print(sender_balance)
+            print(abs(int(transaction.value)))
             #* check that the author has enough credit for the transaction
             if sender_balance < abs(int(transaction.value)):
+                print('fail 1')
                 return False
             #* prevent the author from giving himself credit
             if transaction.author == transaction.dest and transaction.value[0]=="+":
+                print('fail 2')
                 return False
             #* prevent teh author from stealing money to another user
             if transaction.author != transaction.dest and transaction.value[0]=="-":
+                print('fail 3')
                 return False
 
         
@@ -170,9 +179,9 @@ class Blockchain(object):
         string = '-----------Blockchain-----------'
         for block in self.chain:
             string+= '\n' + str(block)
-        # string+= '\n-----------Mempool-----------'
-        # for trans in self.mempool:
-        #     string+= '\n' + str(trans)
+        string+= '\n-----------Mempool-----------'
+        for trans in self.mempool:
+            string+= '\n' + str(trans)
         return string
 
     def validity(self):
@@ -313,7 +322,29 @@ def mon_test():
     blockchain = Blockchain()
     sk = SigningKey.generate()
 
+def admin_test():
+    print('-----------admin_test-----------')
+    import ecdsa
+    from ecdsa import SigningKey
+    blockchain = Blockchain()
+    sk_a = SigningKey.generate()
+    sk_b = SigningKey.generate()
+    sk_admin = config.sk_admin
+    hash_admin = config.admin_list[0]
+
+    t = Transaction('A creation', '-10')
+    t.sign(sk_admin)
+    blockchain.add_transaction(t)
+
+    b = blockchain.new_block()
+    b.mine()
+    blockchain.extend_chain(b)
+
+    print(blockchain)
+    print(blockchain.get_balance(hash_admin))
+
 if __name__ == '__main__':
     print("Blockchain test")
-    simple_test()
-    merge_test()
+    # simple_test()
+    # merge_test()
+    admin_test()
