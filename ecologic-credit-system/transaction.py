@@ -89,6 +89,8 @@ class Transaction(object):
     def data(self):
         d = {
             "message": self.message,
+            "value": self.value,
+            "destination": self.dest,
             "date": self.date,
             "author": self.author,
             "vk": self.vk
@@ -120,16 +122,19 @@ class Transaction(object):
             return True  
         except BadSignatureError:
             return False  
-        
-
-
-
     
     def __str__(self):
         """
         :return: A string representation of the transaction
         """
-        return f"Message:            {self.message}\nDate:               {self.date}\nVerification Key:   {self.vk}\nAuthor:             {self.author}\nSignature:          {self.signature}\n"
+        return f"""
+        Message:            {self.message}
+        Value:              {self.value}
+        Destination:        {self.dest}
+        Date:               {self.date}
+        Verification Key:   {self.vk}
+        Author:             {self.author}
+        Signature:          {self.signature}"""
 
     def __lt__(self, other):
         """
