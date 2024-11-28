@@ -18,11 +18,27 @@ class Blockchain(object):
     @property
     def last_block(self):
         return self.chain[-1]
+    
+    def get_balance(self, verifying_key_hash):
+        """
+        *
+        Returns the balance associated to the verifying key hash in parameters.
+        :param verifying_key_hash:
+        :return: Int
+        """
+        balance = 0
+        for block in self.chain:
+            for transaction in block.transactions:
+                if transaction.author == verifying_key_hash:
+                    balance += transaction.value
+                if transaction.dest == verifying_key_hash:
+                    balance -= transaction.value
+        return balance
 
     def add_transaction(self, transaction):
         """
         Add a new transaction to the mempool. Return True if the transaction is valid and not already in the mempool.
-        *We also assert that the message in the transaction is valid
+        *We also assert that the message in the transaction is valid.
         :param transaction:
         :return: True or False
         """
@@ -46,7 +62,10 @@ class Blockchain(object):
         dest_pattern = r"^[0-9a-fA-F]{430}$"
         if not re.match(dest_pattern, transaction.dest):
             return False
-            
+        
+        sender_balance = self.get_balance(transaction.author)
+        if sender_balance < transaction.value:
+            return False
         
         self.mempool.append(transaction)
         return True
