@@ -6,3 +6,6 @@ blockdepth = 2
 blocksize = 2 ** blockdepth - 1  # Number of messages in a block
 
 default_difficulty = 3
+
+# the list of public keys ash for admins
+admin_list = [] 

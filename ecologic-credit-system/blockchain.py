@@ -49,6 +49,9 @@ class Blockchain(object):
         :param transaction:
         :return: True or False
         """
+        #* a list of hash depicting the admin users
+        admin_list = config.admin_list
+
         if transaction in self.mempool:
             return False
         
@@ -70,9 +73,19 @@ class Blockchain(object):
         if not re.match(dest_pattern, transaction.dest):
             return False
         
-        sender_balance = self.get_balance(transaction.author)
-        if sender_balance < transaction.value:
-            return False
+        #* 
+        if not transaction.author in admin_list:
+            sender_balance = self.get_balance(transaction.author)
+            #* check that the author has enough credit for the transaction
+            if sender_balance < abs(int(transaction.value)):
+                return False
+            #* prevent the author from giving himself credit
+            if transaction.author == transaction.dest and transaction.value[0]=="+":
+                return False
+            #* prevent teh author from stealing money to another user
+            if transaction.author != transaction.dest and transaction.value[0]=="-":
+                return False
+
         
         self.mempool.append(transaction)
         return True
