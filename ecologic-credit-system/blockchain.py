@@ -81,7 +81,6 @@ class Blockchain(object):
             sender_balance = self.get_balance(transaction.author)
             #* check that the author has enough credit to give some to another user
             if transaction.author != transaction.dest and sender_balance < abs(int(transaction.value)):
-                print(sender_balance, abs(int(transaction.value)))
                 return False
             #* prevent the author from giving himself credit
             if transaction.author == transaction.dest and transaction.value[0]=="+":
@@ -383,10 +382,161 @@ def admin_test():
     print("admin :", blockchain.get_balance(hash_admin))
 
     print(blockchain)
+
+def fail_test():
+    print('-----------fail_test-----------')
+    from ecdsa import SigningKey
+    from utils import hash_str
+
+    blockchain = Blockchain()
+    sk_a = SigningKey.generate()
+    hash_a = hash_str(sk_a)
+    sk_b = SigningKey.generate()
+    hash_b = hash_str(sk_b)
+    sk_admin = config.sk_admin
+    hash_admin = config.admin_list[0]
+
+    is_fail = False
+
+    # TEST: For empty balances we check transactions
+    les_t = []
+
+    t = Transaction('A to admin +', '+15', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A +', '+10', hash_b)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('A to admin +', '-15', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A +', '-10', hash_b)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    for t in les_t:
+        if blockchain.add_transaction(t):
+            is_fail = True
+            print(t.message)
+
+    # ACTION: Add credit to A and B 
+    t = Transaction("admin to A", '+1000', hash_a)
+    t.sign(sk_admin)
+    blockchain.add_transaction(t)
+
+    t = Transaction("admin to B", '+1000', hash_b)
+    t.sign(sk_admin)
+    blockchain.add_transaction(t)
+
+    b = blockchain.new_block()
+    b.mine()
+    blockchain.extend_chain(b)
+
+    print("Expect both 1000")
+    print(blockchain.get_balance(hash_a), blockchain.get_balance(hash_b))
+
+    # TEST: For positive balances transfer too big or negative values
+    les_t = []
+
+    t = Transaction('A to admin ++', '+1500', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A ++', '+1500', hash_a)
+    t.sign(sk_b)
+    les_t.append(t)
+
+    t = Transaction('A to admin +-', '-15', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A +-', '-15', hash_a)
+    t.sign(sk_b)
+    les_t.append(t)
+
+    for t in les_t:
+        if blockchain.add_transaction(t):
+            is_fail = True
+            print(t.message)
     
+    # ACTION: Remove credit to A and B (make it negative) 
+    t = Transaction("admin to A", '-2000', hash_a)
+    t.sign(sk_admin)
+    blockchain.add_transaction(t)
+
+    t = Transaction("admin to B", '-2000', hash_b)
+    t.sign(sk_admin)
+    blockchain.add_transaction(t)
+
+    b = blockchain.new_block()
+    b.mine()
+    blockchain.extend_chain(b)
+
+    print("Expect both -1000")
+    print(blockchain.get_balance(hash_a), blockchain.get_balance(hash_b))
+
+    # TEST: For negative balances we check transactions
+    les_t = []
+
+    t = Transaction('A to admin +', '+15', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A +', '+10', hash_a)
+    t.sign(sk_b)
+    les_t.append(t)
+
+    t = Transaction('A to admin +', '-15', hash_admin)
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B to A +', '-10', hash_a)
+    t.sign(sk_b)
+    les_t.append(t)
+
+    for t in les_t:
+        if blockchain.add_transaction(t):
+            is_fail = True
+            print(t.message)
+
+    # TEST: Give himself credit
+    les_t = []
+
+    t = Transaction('A self +', '+150')
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B self +', '+150')
+    t.sign(sk_b)
+    les_t.append(t)
+
+    for t in les_t:
+        if blockchain.add_transaction(t):
+            is_fail = True
+            print(t.message)
+    
+    # TEST: Identity theft is a crime Jimmy
+    les_t = []
+
+    t = Transaction('admin self -', '-150')
+    t.sign(sk_a)
+    les_t.append(t)
+
+    t = Transaction('B self -', '-150')
+    t.sign(sk_a)
+    les_t.append(t)
+
+
+    if is_fail:
+        print("========> WARMING: A FAIL OCCURED <========")
+
 
 if __name__ == '__main__':
     print("Blockchain test")
     # simple_test()
     # merge_test()
-    admin_test()
+    # admin_test()
+    # fail_test()
