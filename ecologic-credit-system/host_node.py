@@ -1,18 +1,11 @@
 from blockchain import *
-from time import time
-import hashlib
-import json
-import requests
+from flask import Flask, jsonify, request
 import socket
-
-from uuid import uuid4
-from flask import Flask, jsonify, request, send_file
+from transaction import Transaction
+import utils
 
 # Instantiate our Node
 app = Flask(__name__)
-
-# Generate a globally unique address for this node
-node_identifier = str(uuid4()).replace('-', '')
 
 # Instantiate the Blockchain
 blockchain = Blockchain()
@@ -36,21 +29,22 @@ def new_transaction():
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['sender', 'recipient', 'amount']
+    required = ['message', 'author', 'vk', 'signature', 'value', 'dest', 'date']
     if not all(k in values for k in required):
         return 'Missing values', 400
 
     # Create a new Transaction
     transaction = Transaction(
-        sender=values['sender'],
-        recipient=values['recipient'],
-        value=values['amount'],
-        date=utils.get_time(),  # Use current time for the transaction
-        message="Example transaction",
-        signature="FakeSignature",  # In a real blockchain, this would be a cryptographic signature
-        vk="FakeVerificationKey"  # In a real blockchain, this would be a public key
+        message=values['message'],
+        author=values['author'],
+        vk=values['vk'],
+        signature=values['signature'],
+        value=values['value'],
+        dest=values['dest'],
+        date=values['date']
     )
 
+    # Add transaction to the mempool
     if blockchain.add_transaction(transaction):
         response = {'message': f'Transaction will be added to the mempool'}
         return jsonify(response), 201
@@ -122,72 +116,42 @@ def consensus():
 
     return jsonify(response), 200
 
-# @app.route('/postman-collection', methods=['GET'])
-# def get_postman_collection():
-#     """
-#     Provide a Postman collection JSON file for easy API testing
-#     """
-#     collection = {
-#         "info": {
-#             "name": "Blockchain API",
-#             "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-#         },
-#         "item": [
-#             {
-#                 "name": "Mine a New Block",
-#                 "request": {
-#                     "method": "GET",
-#                     "header": [],
-#                     "url": {
-#                         "raw": "{{base_url}}/mine",
-#                         "host": ["{{base_url}}"],
-#                         "path": ["mine"]
-#                     }
-#                 }
-#             },
-#             {
-#                 "name": "Create a New Transaction",
-#                 "request": {
-#                     "method": "POST",
-#                     "header": [
-#                         {
-#                             "key": "Content-Type",
-#                             "value": "application/json"
-#                         }
-#                     ],
-#                     "body": {
-#                         "mode": "raw",
-#                         "raw": "{\n  \"sender\": \"address1\",\n  \"recipient\": \"address2\",\n  \"amount\": 10\n}"
-#                     },
-#                     "url": {
-#                         "raw": "{{base_url}}/transactions/new",
-#                         "host": ["{{base_url}}"],
-#                         "path": ["transactions", "new"]
-#                     }
-#                 }
-#             },
-#             {
-#                 "name": "View Full Blockchain",
-#                 "request": {
-#                     "method": "GET",
-#                     "header": [],
-#                     "url": {
-#                         "raw": "{{base_url}}/chain",
-#                         "host": ["{{base_url}}"],
-#                         "path": ["chain"]
-#                     }
-#                 }
-#             }
-#         ]
-#     }
-#     # Convert the collection to JSON and return as a file
-#     with open('blockchain_postman_collection.json', 'w') as f:
-#         json.dump(collection, f, indent=4)
-#     return send_file('blockchain_postman_collection.json', as_attachment=True)
+@app.route('/chain/validate', methods=['GET'])
+def validate_chain():
+    """
+    Validate the entire blockchain
+    """
+    is_valid = blockchain.validity()
+    response = {
+        'valid': is_valid,
+        'message': 'The blockchain is valid' if is_valid else 'The blockchain is not valid'
+    }
+    return jsonify(response), 200
+
+@app.route('/chain/merge', methods=['POST'])
+def merge_chain():
+    """
+    Merge with another blockchain if it is longer and valid
+    """
+    values = request.get_json()
+
+    # Check if the required field 'chain' is present
+    if 'chain' not in values:
+        return 'Missing chain data', 400
+
+    # Create a temporary blockchain from the received data
+    other_chain = Blockchain()
+    other_chain.chain = [Block(**block_data) for block_data in values['chain']]
+
+    # Attempt to merge the blockchains
+    if blockchain.merge(other_chain):
+        response = {'message': 'Blockchain merged successfully'}
+    else:
+        response = {'message': 'Merge unsuccessful. The provided chain is not longer or not valid.'}
+    
+    return jsonify(response), 200
 
 if __name__ == '__main__':
     # Get the local IP address to bind the Flask server
-    recipient = socket.gethostbyname(socket.gethostname())
-    app.run(host=recipient, port=5000)
-
-    
+    host_ip = socket.gethostbyname(socket.gethostname())
+    app.run(host=host_ip, port=5000)
