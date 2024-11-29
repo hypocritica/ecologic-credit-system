@@ -57,7 +57,7 @@ def new_transaction():
             "vk": t.vk,
             "signature": t.signature 
         }
-        
+
         # Send transaction to the backend
         response = requests.post(hostip + '/transactions/new', json=data)
         if response.status_code == 201:
