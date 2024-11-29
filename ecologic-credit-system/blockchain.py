@@ -135,7 +135,7 @@ class Blockchain(object):
                         transaction.value
                     ])
 
-        transactions.sort(key=lambda transaction: utils.str_to_time(transaction[3]))
+        transactions.sort(key=lambda x: x[0])
 
         return transactions
 

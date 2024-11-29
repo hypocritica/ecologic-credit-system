@@ -100,7 +100,15 @@ def view_past_transactions():
         response = requests.post(hostip + '/past_transactions', json={'hash': hash})
         if response.status_code == 200:
             history = response.json()["histo"]
-            messagebox.showinfo("Transaction History", f"Target's transactions history is:\n {history}")
+            colonnes = ["Date", "Message", "Auteur", "Destinataire", "Valeur", "Effet sur la Balance"]
+
+            tableau = " | ".join(colonnes) + "\n"  
+            tableau += "-" * 80 + "\n" 
+
+            for ligne in history:
+                tableau += " | ".join(ligne) + "\n"  
+
+            messagebox.showinfo("Transaction History", tableau)
         else:
             messagebox.showerror("Balance", "Failed to get balance.")
     except Exception as e:
