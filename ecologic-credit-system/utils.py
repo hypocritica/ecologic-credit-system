@@ -23,3 +23,9 @@ def hash_str(sk):
     vk = sk.verifying_key.to_pem().hex()
     hash = hashlib.sha256(vk.encode()).hexdigest()
     return hash
+
+def inv_sign(string):
+    if string[0] == '+':
+        return '-' + string[1:]
+    elif string[0] == '-':
+        return '+' + string[1:]

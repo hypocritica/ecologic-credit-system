@@ -107,26 +107,32 @@ class Blockchain(object):
                     if transaction.dest == vk_hash:
                         # Transaction with theyselves (creation or suppression of credits)
                         transactions.append([
+                            transaction.data,
                             transaction.message,
-                            int(transaction.value), 
-                            None,
-                            transaction.date
+                            transaction.author[:6] + '...',
+                            transaction.dest[:6] + '...',
+                            transaction.value,
+                            transaction.value
                         ])
                     else:
                         # Transaction to another user
                         transactions.append([
+                            transaction.data,
                             transaction.message,
-                            -int(transaction.value),  
-                            transaction.dest,
-                            transaction.date
+                            transaction.author[:6] + '...',
+                            transaction.dest[:6] + '...',
+                            transaction.value,
+                            utils.inv_sign(transaction.value)
                         ])
                 elif transaction.dest == vk_hash:
                     # Transaction received by vk_hash
                     transactions.append([
+                        transaction.data,
                         transaction.message,
-                        int(transaction.value),  
-                        transaction.author,
-                        transaction.date
+                        transaction.author[:6] + '...',
+                        transaction.dest[:6] + '...',
+                        transaction.value,
+                        transaction.value
                     ])
 
         transactions.sort(key=lambda transaction: utils.str_to_time(transaction[3]))
