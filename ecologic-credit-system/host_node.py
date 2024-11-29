@@ -42,8 +42,8 @@ def new_transaction():
         dest=values['dest'],
         date = values['date'],
         author = values['author'],
-        vk = values['vk'],
-        signature = values['signature']
+        vk = str(values['vk']).encode(),
+        signature = values['signature'].encode()
     )
     print(transaction)
     # Add transaction to the mempool
