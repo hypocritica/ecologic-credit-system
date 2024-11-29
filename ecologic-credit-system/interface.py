@@ -48,7 +48,7 @@ def new_transaction():
         }
         
         # Send transaction to the backend
-        response = requests.post(hostip + '/new', json=data)
+        response = requests.post(hostip + '/transactions/new', json=data)
         if response.status_code == 201:
             messagebox.showinfo("New Transaction", response.json()["message"])
         else:
