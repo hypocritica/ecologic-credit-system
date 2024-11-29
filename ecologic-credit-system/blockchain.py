@@ -80,7 +80,7 @@ class Blockchain(object):
         if not transaction.author in admin_list:
             sender_balance = self.get_balance(transaction.author)
             #* check that the author has enough credit to give some to another user
-            if sender_balance < abs(int(transaction.value)):
+            if sender_balance <= abs(int(transaction.value)):
                 return False
             #* prevent the author from giving himself credit
             if transaction.author == transaction.dest and transaction.value[0]=="+":
