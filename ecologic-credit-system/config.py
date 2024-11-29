@@ -11,9 +11,13 @@ default_difficulty = 3
 import ecdsa
 from ecdsa import SigningKey
 from utils import hash_str
+import binascii
 
-sk_admin = SigningKey.generate(curve=ecdsa.SECP256k1)
-hash = hash_str(sk_admin)
+sk_string = "db0c4b254aa20966c6944e92ba2db603e43ae4c96193a24b"
+sk_bytes = binascii.unhexlify(sk_string.encode('utf-8'))
+sk_restored = SigningKey.from_string(sk_bytes)
+hash = hash_str(sk_restored)
+
 admin_list = [hash] 
 
 show_mempool = True

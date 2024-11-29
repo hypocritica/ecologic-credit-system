@@ -7,6 +7,7 @@ import re
 import utils
 from ecdsa import SigningKey
 from transaction import Transaction
+import binascii
 
 global hostip
 hostip = 'http://138.195.53.65:5000'
@@ -81,6 +82,7 @@ def view_chain():
 
 
 sk = SigningKey.generate()
+print(binascii.hexlify(sk.to_string()).decode('utf-8'))
 
 # Setup Tkinter window
 root = tk.Tk()

@@ -1,4 +1,6 @@
 from transaction import Transaction
+from ecdsa import SigningKey
+import binascii
 
 Message = "test"
 Value = "-10"
@@ -13,3 +15,14 @@ t = Transaction(Message, Value, Destination, Date, Signature ,Verification_Key, 
 print(t.verify())
 
 print(len(Destination))
+
+sk = SigningKey.generate()
+
+sk_string = binascii.hexlify(sk.to_string()).decode('utf-8')
+
+sk_bytes = binascii.unhexlify(sk_string.encode('utf-8'))
+sk_restored = SigningKey.from_string(sk_bytes)
+
+print(sk_string)
+
+print(sk_restored == sk)
