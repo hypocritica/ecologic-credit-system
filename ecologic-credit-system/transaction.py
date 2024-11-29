@@ -121,9 +121,9 @@ class Transaction(object):
         Verify the signature of the transaction and the author.
         :return: True or False
         """
-        VK = VerifyingKey.from_pem(bytes.fromhex(self.vk))
+        VK = VerifyingKey.from_pem(bytes.fromhex(str(self.vk)))
 
-        binary_signature = bytes.fromhex(self.signature)
+        binary_signature = bytes.fromhex(str(self.signature))
 
         try:
             VK.verify(binary_signature, self.json_dumps().encode())
