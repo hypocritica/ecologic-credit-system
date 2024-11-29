@@ -26,3 +26,4 @@ sk_restored = SigningKey.from_string(sk_bytes)
 print(sk_string)
 
 print(sk_restored == sk)
+
