@@ -67,7 +67,7 @@ class Transaction(object):
         self.vk = vk
 
         if vk:
-            self.author = hashlib.sha256(vk).hexdigest()
+            self.author = hashlib.sha256(vk.encode()).hexdigest()
         else:
             self.author = author
 
@@ -241,10 +241,17 @@ def test2():
     print(sk2.verifying_key.to_pem().hex())
     print(sk.verifying_key.to_pem().hex() == sk2.verifying_key.to_pem().hex())
 
+def test3():
+    from ecdsa import SigningKey
+    sk = SigningKey.generate()
+    vk = sk.verifying_key.to_pem().hex()
+    print(type(vk))
+    t = Transaction('test', '-10', None, None, None, vk, None)
 
 if __name__ == "__main__":
     print("Test Transaction")
-    test0()
-    test1()
-    test2()
+    # test0()
+    # test1()
+    # test2()
+    # test3()
 
