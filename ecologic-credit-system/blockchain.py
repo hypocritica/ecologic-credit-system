@@ -108,7 +108,7 @@ class Blockchain(object):
                         # Transaction with theyselves (creation or suppression of credits)
                         transactions.append([
                             transaction.message,
-                            int(transaction.val[1:]), 
+                            int(transaction.value), 
                             None,
                             transaction.date
                         ])
@@ -116,7 +116,7 @@ class Blockchain(object):
                         # Transaction to another user
                         transactions.append([
                             transaction.message,
-                            -int(transaction.val[1:]),  
+                            -int(transaction.value),  
                             transaction.dest,
                             transaction.date
                         ])
@@ -124,7 +124,7 @@ class Blockchain(object):
                     # Transaction received by vk_hash
                     transactions.append([
                         transaction.message,
-                        int(transaction.val[1:]),  
+                        int(transaction.value),  
                         transaction.author,
                         transaction.date
                     ])
@@ -381,7 +381,15 @@ def admin_test():
     print("b :", blockchain.get_balance(hash_b))
     print("admin :", blockchain.get_balance(hash_admin))
 
+    print(blockchain.get_transaction_history(hash_a))
+    print(blockchain.get_transaction_history(hash_b))
+    print(blockchain.get_transaction_history(hash_admin))
+
     print(blockchain)
+
+
+
+
 
 def fail_test():
     print('-----------fail_test-----------')
