@@ -107,7 +107,7 @@ class Blockchain(object):
                     if transaction.dest == vk_hash:
                         # Transaction with theyselves (creation or suppression of credits)
                         transactions.append([
-                            transaction.data,
+                            transaction.date,
                             transaction.message,
                             transaction.author[:6] + '...',
                             transaction.dest[:6] + '...',
@@ -117,7 +117,7 @@ class Blockchain(object):
                     else:
                         # Transaction to another user
                         transactions.append([
-                            transaction.data,
+                            transaction.date,
                             transaction.message,
                             transaction.author[:6] + '...',
                             transaction.dest[:6] + '...',
@@ -127,7 +127,7 @@ class Blockchain(object):
                 elif transaction.dest == vk_hash:
                     # Transaction received by vk_hash
                     transactions.append([
-                        transaction.data,
+                        transaction.date,
                         transaction.message,
                         transaction.author[:6] + '...',
                         transaction.dest[:6] + '...',
