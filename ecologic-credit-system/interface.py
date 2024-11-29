@@ -42,8 +42,6 @@ def new_transaction():
             messagebox.showerror("Input Error", "Value must start with '+' for credits gained or '-' for credits lost.")
             return
         
-        sk = SigningKey.generate()
-
         t = Transaction(message, value, destinataire)
         t.sign(sk)
 
@@ -81,6 +79,8 @@ def view_chain():
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
+
+sk = SigningKey.generate()
 
 # Setup Tkinter window
 root = tk.Tk()
