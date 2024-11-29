@@ -4,6 +4,9 @@ import requests
 import json
 import socket
 import re
+import utils
+from ecdsa import SigningKey
+from transaction import Transaction
 
 global hostip
 hostip = 'http://138.195.53.65:5000'
@@ -39,16 +42,24 @@ def new_transaction():
             messagebox.showerror("Input Error", "Value must start with '+' for credits gained or '-' for credits lost.")
             return
         
+        sk = SigningKey.generate()
+
+        t = Transaction(message, value, destinataire)
+        t.sign(sk)
+
         # Transaction data
         data = {
-            "sender": sender,
-            "destinataire": destinataire,
-            "message": message,
-            "value": value
+            "message": t.message,
+            "value": t.value,
+            "dest": t.dest,
+            "date": t.date,
+            "author": t.author,
+            "vk": t.vk,
+            "signature": t.signature 
         }
         
         # Send transaction to the backend
-        response = requests.post(hostip + '/new', json=data)
+        response = requests.post(hostip + '/transactions/new', json=data)
         if response.status_code == 201:
             messagebox.showinfo("New Transaction", response.json()["message"])
         else:
