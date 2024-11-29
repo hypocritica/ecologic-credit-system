@@ -42,7 +42,7 @@ def new_transaction():
         dest=values['dest'],
         date = values['date'],
         author = values['author'],
-        vk = str(values['vk']).encode(),
+        vk = values['vk'],
         signature = values['signature'].encode()
     )
     print(transaction)
