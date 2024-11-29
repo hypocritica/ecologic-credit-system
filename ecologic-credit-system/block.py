@@ -25,7 +25,6 @@ class Block(object):
                 self.index = data['index']
                 self.timestamp = data['timestamp']
                 self.transactions = data['transactions']
-                self.proof = data['proof']
                 self.previous_hash = data['previous_hash']
 
             except:
@@ -35,7 +34,6 @@ class Block(object):
             self.index = 0
             self.timestamp = "2023-11-24 00:00:00.000000"
             self.transactions = []
-            self.proof = 0
             self.previous_hash = "0" * 64
 
     def next(self, transactions):
@@ -47,7 +45,6 @@ class Block(object):
         d = {'index': self.index + 1,
              'timestamp': utils.get_time(),
              'transactions': transactions,
-             'proof': 0,
              'previous_hash': self.hash()}
         
         return Block(d)
@@ -57,7 +54,6 @@ class Block(object):
         d = {'index': self.index,
              'timestamp': self.timestamp,
              'transactions': [transaction.hash() for transaction in self.transactions],
-             'proof': self.proof,
              'previous_hash': self.previous_hash}
     
         return d
@@ -90,37 +86,36 @@ class Block(object):
 index:                  {self.index}
 hash:                   {str_hash}
 timestamp:              {self.timestamp}
-nb of transactions:     {len(self.transactions)}
-proof:                  {self.proof}"""
+nb of transactions:     {len(self.transactions)}"""
     
         return string
 
-    def valid_proof(self, difficulty=config.default_difficulty):
-        """
-        Check if the proof of work is valid. The proof of work is valid if the hash of the block starts with a number
-        of 0 equal to difficulty.
+    # def valid_proof(self, difficulty=config.default_difficulty):
+    #     """
+    #     Check if the proof of work is valid. The proof of work is valid if the hash of the block starts with a number
+    #     of 0 equal to difficulty.
 
-        If index is 0, the proof of work is valid.
-        :param difficulty: the number of 0 the hash must start with
-        :return: True or False
-        """
-        if difficulty == 0:
-            return True
-        else:
-            str_hash = self.hash()
-            return str_hash[:difficulty] == '0' * difficulty
+    #     If index is 0, the proof of work is valid.
+    #     :param difficulty: the number of 0 the hash must start with
+    #     :return: True or False
+    #     """
+    #     if difficulty == 0:
+    #         return True
+    #     else:
+    #         str_hash = self.hash()
+    #         return str_hash[:difficulty] == '0' * difficulty
 
-    def mine(self, difficulty=config.default_difficulty):
-        """
-        Mine the current block. The block is valid if the hash of the block starts with a number of 0 equal to
-        config.default_difficulty.
-        :return: the proof of work
-        """
-        proof = 0
-        while not self.valid_proof(difficulty):
-            proof += 1
-            self.proof = proof
-        return self.proof
+    # def mine(self, difficulty=config.default_difficulty):
+    #     """
+    #     Mine the current block. The block is valid if the hash of the block starts with a number of 0 equal to
+    #     config.default_difficulty.
+    #     :return: the proof of work
+    #     """
+    #     proof = 0
+    #     while not self.valid_proof(difficulty):
+    #         proof += 1
+    #         self.proof = proof
+    #     return self.proof
 
     def validity(self):
         """
@@ -133,8 +128,8 @@ proof:                  {self.proof}"""
         if self.index == 0:
             return True
         else:
-            if not self.valid_proof():
-                return False
+            # if not self.valid_proof():
+            #     return False
             
             for transaction in self.transactions:
                 if not transaction.verify:

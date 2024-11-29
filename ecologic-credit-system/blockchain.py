@@ -157,15 +157,14 @@ class Blockchain(object):
         :raise InvalidBlock if the block is invalid
         """
         if (block.index == self.last_block.index + 1 
-            and block.previous_hash == self.last_block.hash() 
-            and block.valid_proof()):
+            and block.previous_hash == self.last_block.hash()):
 
             self.chain.append(block)
 
         else:
             print(block.index > self.last_block.index)
             print(block.previous_hash == self.last_block.hash())
-            print(block.proof)
+            # print(block.proof)
             raise InvalidBlock
 
     def __str__(self):
