@@ -75,14 +75,41 @@ def view_chain():
         if response.status_code == 200:
             chain_data = json.dumps(response.json(), indent=4)
             messagebox.showinfo("Blockchain", chain_data)
+            # messagebox.showinfo("Blockchain", response)
         else:
             messagebox.showerror("View Chain", "Failed to retrieve blockchain.")
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
 
+def view_balance():
+    hash = target_entry.get()
+    try:
+        response = requests.post(hostip + '/balance', json={'hash': hash})
+        if response.status_code == 200:
+            messagebox.showinfo("Balance", f"Target's balance is {response.json()["balance"]} credits")
+        else:
+            messagebox.showerror("Balance", "Failed to get balance.")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+
+def view_past_transactions():
+    hash = target_entry.get()
+    try:
+        response = requests.post(hostip + '/past_transactions', json={'hash': hash})
+        if response.status_code == 200:
+            history = response.json()["histo"]
+            messagebox.showinfo("Transaction History", f"Target's transactions history is:\n {history}")
+        else:
+            messagebox.showerror("Balance", "Failed to get balance.")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+
 sk = SigningKey.generate()
 print(binascii.hexlify(sk.to_string()).decode('utf-8'))
+print(utils.hash_str(sk))
 
 # Setup Tkinter window
 root = tk.Tk()
@@ -121,6 +148,19 @@ transaction_button.pack(pady=10)
 # View Blockchain Button
 view_chain_button = tk.Button(root, text="View Full Blockchain", command=view_chain)
 view_chain_button.pack(pady=10)
+
+# View someone's balance and past transactions
+tk.Label(root, text="Target (Hash):").pack(pady=5)
+target_entry = tk.Entry(root)
+target_entry.pack()
+
+# Create Transaction Button
+balance_button = tk.Button(root, text="View Balance", command=view_balance)
+balance_button.pack(pady=10)
+
+# View Blockchain Button
+past_transactions_button = tk.Button(root, text="View Past Transactions", command=view_past_transactions)
+past_transactions_button.pack(pady=10)
 
 # Start Tkinter loop
 root.mainloop()
