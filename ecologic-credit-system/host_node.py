@@ -29,17 +29,23 @@ def new_transaction():
     values = request.get_json()
 
     # Check that the required fields are in the POST'ed data
-    required = ['message', 'value', 'dest']
+    required = ['message', 'value', 'dest','date','author','vk','signature']
     if not all(k in values for k in required):
         return 'Missing values', 400
-
+    
+    print(values)
+    
     # Create a new Transaction
     transaction = Transaction(
         message=values['message'],
         value=values['value'],
         dest=values['dest'],
+        date = values['date'],
+        author = values['author'],
+        vk = str(values['vk']).encode(),
+        signature = values['signature'].encode()
     )
-
+    print(transaction)
     # Add transaction to the mempool
     if blockchain.add_transaction(transaction):
         response = {'message': f'Transaction will be added to the mempool'}
