@@ -13,7 +13,7 @@ from ecdsa import SigningKey
 from utils import hash_str
 import binascii
 
-sk_string = "db0c4b254aa20966c6944e92ba2db603e43ae4c96193a24b"
+sk_string = "a2b461ce2e0f2af25163413a06f3c0eb8ef9081cb556192e"
 sk_bytes = binascii.unhexlify(sk_string.encode('utf-8'))
 sk_restored = SigningKey.from_string(sk_bytes)
 hash = hash_str(sk_restored)

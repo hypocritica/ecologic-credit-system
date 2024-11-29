@@ -16,10 +16,29 @@ def full_chain():
     Retrieve the entire blockchain
     """
     response = {
-        'chain': [block.__dict__ for block in blockchain.chain],
-        'length': len(blockchain.chain),
+        # 'chain': [block.__dict__ for block in blockchain.chain],
+        # 'length': len(blockchain.chain),
+        'blockchain': str(blockchain)
     }
     return jsonify(response), 200
+    # return response, 200
+    
+@app.route('/balance', methods=['POST'])
+def view_balance():
+    data = request.get_json()
+    hash = data['hash']
+    print(hash)
+    bal = blockchain.get_balance(hash)
+    return jsonify({'balance':bal}), 200
+    
+
+@app.route('/past_transactions', methods=['POST'])
+def view_past_transactions():
+    data = request.get_json()
+    hash = data['hash']
+    print(hash)
+    histo = blockchain.get_transaction_history(hash)
+    return jsonify({'histo':histo}), 200
 
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
@@ -37,13 +56,13 @@ def new_transaction():
     
     # Create a new Transaction
     transaction = Transaction(
-        message=values['message'],
-        value=values['value'],
-        dest=values['dest'],
+        message = values['message'],
+        value = values['value'],
+        dest = values['dest'],
         date = values['date'],
         author = values['author'],
         vk = values['vk'],
-        signature = values['signature'].encode()
+        signature = values['signature']
     )
     print(transaction)
     # Add transaction to the mempool
@@ -59,7 +78,7 @@ def mine():
     Mine a new block by taking transactions from the mempool
     """
     if len(blockchain.mempool) == 0:
-        return 'No transactions to mine', 400
+        return 'No transactions to mine', 250
 
     # Create a new block from transactions in the mempool
     new_block = blockchain.new_block()
@@ -68,7 +87,7 @@ def mine():
     try:
         blockchain.extend_chain(new_block)
     except InvalidBlock:
-        return 'Invalid block', 400
+        return 'Invalid block', 450
 
     response = {
         'message': "New Block Forged",
